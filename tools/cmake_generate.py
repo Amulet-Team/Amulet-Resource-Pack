@@ -5,6 +5,7 @@ import shutil
 
 import pybind11
 import amulet.pybind11_extensions
+import amulet.utils
 import amulet.test_utils
 
 
@@ -35,6 +36,7 @@ def main():
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-Dpybind11_DIR={fix_path(pybind11.get_cmake_dir())}",
             f"-Damulet_pybind11_extensions_DIR={fix_path(amulet.pybind11_extensions.__path__[0])}",
+            f"-Damulet_utils_DIR={fix_path(amulet.utils.__path__[0])}",
             f"-Damulet_resource_pack_DIR={fix_path(os.path.join(RootDir, 'src', 'amulet', 'resource_pack'))}",
             f"-Damulet_test_utils_DIR={fix_path(amulet.test_utils.__path__[0])}",
             f"-DCMAKE_INSTALL_PREFIX=install",

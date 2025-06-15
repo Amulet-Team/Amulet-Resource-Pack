@@ -26,6 +26,7 @@ find_package(pybind11 CONFIG REQUIRED)
 
 # Add Amulet libraries
 find_package(amulet_pybind11_extensions CONFIG REQUIRED)
+find_package(amulet_utils CONFIG REQUIRED)
 
 # Find C++ files
 file(REAL_PATH src SOURCE_PATH)
@@ -39,6 +40,7 @@ list(REMOVE_ITEM HEADERS ${EXTENSION_HEADERS})
 # Add implementation
 add_library(amulet_resource_pack SHARED)
 target_compile_definitions(amulet_resource_pack PRIVATE ExportAmuletResourcePack)
+target_link_libraries( amulet_resource_pack PUBLIC amulet_utils )
 target_include_directories(amulet_resource_pack PUBLIC ${SOURCE_PATH})
 target_sources(amulet_resource_pack PRIVATE ${SOURCES} ${HEADERS})
 foreach(FILE ${SOURCES} ${HEADERS})

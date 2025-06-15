@@ -6,6 +6,7 @@ import os
 import pybind11
 
 import amulet.pybind11_extensions
+import amulet.utils
 import amulet.resource_pack
 import amulet.test_utils
 
@@ -38,6 +39,7 @@ def main() -> None:
             f"-DPYTHON_EXECUTABLE={sys.executable}",
             f"-Dpybind11_DIR={fix_path(pybind11.get_cmake_dir())}",
             f"-Damulet_pybind11_extensions_DIR={(amulet.pybind11_extensions.__path__[0])}",
+            f"-Damulet_utils_DIR={fix_path(amulet.utils.__path__[0])}",
             f"-Damulet_resource_pack_DIR={fix_path(amulet.resource_pack.__path__[0])}",
             f"-Damulet_test_utils_DIR={fix_path(amulet.test_utils.__path__[0])}",
             "-B",
