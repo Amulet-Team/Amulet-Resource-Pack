@@ -41,7 +41,9 @@ class CMakeBuild(cmdclass.get("build_ext", build_ext)):
             / "resource_pack"
         )
         resource_pack_src_dir = (
-            Path.cwd() / "src" / "amulet" / "resource_pack" if self.editable_mode else ext_dir
+            Path.cwd() / "src" / "amulet" / "resource_pack"
+            if self.editable_mode
+            else ext_dir
         )
 
         platform_args = []

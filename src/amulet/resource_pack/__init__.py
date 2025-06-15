@@ -16,7 +16,9 @@ def _init() -> None:
     if sys.platform == "win32":
         lib_path = os.path.join(os.path.dirname(__file__), "amulet_resource_pack.dll")
     elif sys.platform == "darwin":
-        lib_path = os.path.join(os.path.dirname(__file__), "libamulet_resource_pack.dylib")
+        lib_path = os.path.join(
+            os.path.dirname(__file__), "libamulet_resource_pack.dylib"
+        )
     elif sys.platform == "linux":
         lib_path = os.path.join(os.path.dirname(__file__), "libamulet_resource_pack.so")
     else:

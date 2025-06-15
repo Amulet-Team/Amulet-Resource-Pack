@@ -4,6 +4,7 @@ from .abc import BaseResourcePack, BaseResourcePackManager
 from .java import JavaResourcePack, JavaResourcePackManager
 from .unknown_resource_pack import UnknownResourcePack
 
+
 def load_resource_pack(resource_pack_path: str) -> BaseResourcePack:
     if JavaResourcePack.is_valid(resource_pack_path):
         return JavaResourcePack(resource_pack_path)

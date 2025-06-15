@@ -168,7 +168,9 @@ def main() -> None:
     src_path = os.path.join(root_path, "src")
     amulet_resource_pack_path = get_package_dir("amulet.resource_pack")
     tests_path = os.path.join(root_path, "tests")
-    test_amulet_resource_pack_path = os.path.join(tests_path, "test_amulet_resource_pack")
+    test_amulet_resource_pack_path = os.path.join(
+        tests_path, "test_amulet_resource_pack"
+    )
 
     # make tests importable
     sys.path.append(tests_path)
