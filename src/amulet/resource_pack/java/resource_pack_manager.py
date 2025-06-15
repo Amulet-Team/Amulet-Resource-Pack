@@ -11,10 +11,10 @@ import re
 from amulet.nbt import StringTag
 
 from amulet.utils.cast import dynamic_cast
-from amulet.core.block import Block, PropertyValueType
+from amulet.core.block import Block
 from amulet.resource_pack import BaseResourcePackManager
 from amulet.resource_pack.java import JavaResourcePack
-from amulet.resource_pack.mesh import (
+from amulet.resource_pack.mesh.block import (
     BlockMesh,
     BlockMeshPart,
     Triangle,
@@ -58,7 +58,7 @@ CULL_DIRECTIONS = {
 }
 
 
-def get_py_data(obj: PropertyValueType) -> str | bytes | int:
+def get_py_data(obj: Block.PropertyValue) -> str | bytes | int:
     if isinstance(obj, StringTag):
         return obj.py_str_or_bytes
     else:

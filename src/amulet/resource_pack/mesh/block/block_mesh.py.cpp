@@ -163,12 +163,11 @@ void init_block_mesh(py::module m)
         },
         py::arg("meshes"), py::doc("Merge multiple block mesh objects into one block mesh."));
 
-    m.attr("CUBE_FACE_LUT") = py::module::import("amulet.mesh.block._cube").attr("CUBE_FACE_LUT");
-    m.attr("TRI_FACE") = py::module::import("amulet.mesh.block._cube").attr("TRI_FACE");
-    m.attr("UV_ROTATION_LUT") = py::module::import("amulet.mesh.block._cube").attr("UV_ROTATION_LUT");
-    m.attr("get_cube") = py::module::import("amulet.mesh.block._cube").attr("get_cube");
-    m.attr("get_unit_cube") = py::module::import("amulet.mesh.block._cube").attr("get_unit_cube");
-    m.attr("get_missing_block") = py::module::import("amulet.mesh.block._missing_block").attr("get_missing_block");
+    m.attr("CUBE_FACE_LUT") = py::module::import("amulet.resource_pack.mesh.block._cube").attr("CUBE_FACE_LUT");
+    m.attr("TRI_FACE") = py::module::import("amulet.resource_pack.mesh.block._cube").attr("TRI_FACE");
+    m.attr("UV_ROTATION_LUT") = py::module::import("amulet.resource_pack.mesh.block._cube").attr("UV_ROTATION_LUT");
+    m.attr("get_cube") = py::module::import("amulet.resource_pack.mesh.block._cube").attr("get_cube");
+    m.attr("get_unit_cube") = py::module::import("amulet.resource_pack.mesh.block._cube").attr("get_unit_cube");
 
     py::dict face_keys;
     face_keys[py::none()] = Amulet::BlockMeshCullDirection::BlockMeshCullNone;
