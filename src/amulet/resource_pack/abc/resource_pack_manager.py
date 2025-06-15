@@ -2,9 +2,13 @@ from typing import Optional, Iterator, TypeVar, Generic
 import json
 
 from amulet.core.block import Block, BlockStack
-from amulet.resource_pack.mesh import BlockMesh, merge_block_meshes, get_missing_block
+from amulet.resource_pack.mesh.block import (
+    BlockMesh,
+    merge_block_meshes,
+    get_unit_cube,
+)
 from amulet.resource_pack.abc.resource_pack import BaseResourcePack
-from amulet.image import missing_no_icon_path
+from amulet.utils.image import missing_no_icon_path
 
 PackT = TypeVar("PackT", bound=BaseResourcePack)
 
@@ -51,7 +55,15 @@ class BaseResourcePackManager(Generic[PackT]):
     @property
     def missing_block(self) -> BlockMesh:
         if self._missing_block is None:
-            self._missing_block = get_missing_block(self)
+            texture_path = self.get_texture_path("minecraft", "missing_no")
+            self._missing_block = get_unit_cube(
+                texture_path,
+                texture_path,
+                texture_path,
+                texture_path,
+                texture_path,
+                texture_path,
+            )
         return self._missing_block
 
     @property

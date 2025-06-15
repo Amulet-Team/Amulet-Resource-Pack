@@ -7,12 +7,14 @@ namespace py = pybind11;
 namespace pyext = Amulet::pybind11_extensions;
 
 void init_mesh(py::module);
+void init_image(py::module);
 
 void init_module(py::module m)
 {
     pyext::init_compiler_config(m);
 
     init_mesh(m);
+    init_image(m);
 }
 
 PYBIND11_MODULE(_amulet_resource_pack, m)
