@@ -5,9 +5,8 @@ import typing
 
 import numpy
 from amulet.resource_pack.mesh.block._cube import get_cube, get_unit_cube
-from amulet.resource_pack.mesh import get_missing_block, _cube
 
-from amulet.resource_pack.mesh.block import _missing_block
+from . import _cube
 
 __all__ = [
     "BlockMesh",
@@ -23,7 +22,6 @@ __all__ = [
     "UV_ROTATION_LUT",
     "Vertex",
     "get_cube",
-    "get_missing_block",
     "get_unit_cube",
     "merge_block_meshes",
 ]
