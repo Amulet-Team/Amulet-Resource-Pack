@@ -356,7 +356,9 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
         # recursively load model files into one dictionary
         java_model = self._recursive_load_block_model(model_path)
 
-        if java_model.get("textures", {}) and not java_model.get("elements"):
+        if set(java_model.get("textures", {})).difference(
+            {"particle"}
+        ) and not java_model.get("elements"):
             return self.missing_block
 
         # set up some variables
