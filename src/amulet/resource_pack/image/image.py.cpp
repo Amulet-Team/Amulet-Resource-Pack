@@ -2,7 +2,7 @@
 
 #include <filesystem>
 
-#include <Amulet/pybind11_extensions/py_module.hpp>
+#include <amulet/pybind11_extensions/py_module.hpp>
 
 #include "image.hpp"
 
