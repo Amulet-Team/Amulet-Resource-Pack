@@ -145,9 +145,6 @@ def _download_resources(
     chunk_size: int = 4096,
 ) -> None:
     log.info(f"Downloading Java resource pack for version {version}")
-    progress_manager.update_progress_text(
-        f"Downloading Java resource pack for version {version}"
-    )
     version_url = next(
         (v["url"] for v in get_launcher_manifest()["versions"] if v["id"] == version),
         None,
