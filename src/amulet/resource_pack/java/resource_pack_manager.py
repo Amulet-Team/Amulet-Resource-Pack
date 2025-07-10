@@ -158,7 +158,10 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                                 os.stat(texture_path).st_mtime,
                                 texture_is_transparent,
                             )
-                    image_progress_manager.update_progress(image_index / image_count)
+                    if not image_index % 100:
+                        image_progress_manager.update_progress(
+                            image_index / image_count
+                        )
 
                 blockstate_progress_manager = pack_progress_manager.get_child(
                     1 / 3, 2 / 3
@@ -180,9 +183,10 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     blockstate_file_paths[(namespace, blockstate_file[:-5])] = (
                         blockstate_path
                     )
-                    blockstate_progress_manager.update_progress(
-                        blockstate_index / blockstate_count
-                    )
+                    if not blockstate_index % 100:
+                        blockstate_progress_manager.update_progress(
+                            blockstate_index / blockstate_count
+                        )
 
                 model_progress_manager = pack_progress_manager.get_child(2 / 3, 1.0)
                 model_paths = glob.glob(
@@ -205,7 +209,10 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     model_file_paths[(namespace, rel_path.replace(os.sep, "/"))] = (
                         model_path
                     )
-                    model_progress_manager.update_progress(model_index / model_count)
+                    if not model_index % 100:
+                        model_progress_manager.update_progress(
+                            model_index / model_count
+                        )
 
         os.makedirs(os.path.dirname(transparency_cache_path), exist_ok=True)
         with open(transparency_cache_path, "w") as f:
