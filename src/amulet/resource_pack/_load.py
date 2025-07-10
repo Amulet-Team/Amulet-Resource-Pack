@@ -26,7 +26,7 @@ def load_resource_pack_manager(
             and resource_pack.valid_pack
         ):
             if resource_packs_out:
-                if isinstance(resource_pack, resource_packs_out[0].__class__):
+                if isinstance(resource_pack, type(resource_packs_out[0])):
                     resource_packs_out.append(resource_pack)
             else:
                 resource_packs_out.append(resource_pack)
