@@ -11,6 +11,7 @@ import re
 from amulet.nbt import StringTag
 
 from amulet.utils.cast import dynamic_cast
+from amulet.utils.task_manager import AbstractProgressManager
 from amulet.core.block import Block
 from amulet.resource_pack import BaseResourcePackManager
 from amulet.resource_pack.java import JavaResourcePack
@@ -86,8 +87,7 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
         else:
             raise Exception(f"Invalid format {resource_packs}")
         if load:
-            for _ in self.reload():
-                pass
+            self.reload()
 
     def _unload(self) -> None:
         """Clear all loaded resources."""
@@ -97,7 +97,7 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
         self._texture_is_transparent.clear()
         self._model_files.clear()
 
-    def _load_iter(self) -> Iterator[float]:
+    def _load(self, progress_manager: AbstractProgressManager) -> None:
         blockstate_file_paths: dict[tuple[str, str], str] = {}
         model_file_paths: dict[tuple[str, str], str] = {}
 
@@ -116,10 +116,14 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
             # pack_format=4 textures/block, textures/item
             # pack_format=5 model paths and texture paths are now optionally namespaced
 
-            pack_progress = pack_index / pack_count
-            yield pack_progress
+            pack_progress_manager = progress_manager.get_child(
+                max(0.0, pack_index / pack_count),
+                min(1.0, (1 + pack_index) / pack_count),
+            )
+            pack_progress_manager.update_progress(0.0)
 
             if pack.valid_pack and pack.pack_format >= 2:
+                image_progress_manager = pack_progress_manager.get_child(0.0, 1 / 3)
                 image_paths = glob.glob(
                     os.path.join(
                         glob.escape(pack.root_dir),
@@ -132,7 +136,6 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     recursive=True,
                 )
                 image_count = len(image_paths)
-                sub_progress = pack_progress
                 for image_index, texture_path in enumerate(image_paths):
                     _, namespace, _, *rel_path_list = os.path.normpath(
                         os.path.relpath(texture_path, pack.root_dir)
@@ -155,8 +158,11 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                                 os.stat(texture_path).st_mtime,
                                 texture_is_transparent,
                             )
-                    yield sub_progress + image_index / (image_count * pack_count * 3)
+                    image_progress_manager.update_progress(image_index / image_count)
 
+                blockstate_progress_manager = pack_progress_manager.get_child(
+                    1 / 3, 2 / 3
+                )
                 blockstate_paths = glob.glob(
                     os.path.join(
                         glob.escape(pack.root_dir),
@@ -167,7 +173,6 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     )
                 )
                 blockstate_count = len(blockstate_paths)
-                sub_progress = pack_progress + 1 / (pack_count * 3)
                 for blockstate_index, blockstate_path in enumerate(blockstate_paths):
                     _, namespace, _, blockstate_file = os.path.normpath(
                         os.path.relpath(blockstate_path, pack.root_dir)
@@ -175,10 +180,11 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     blockstate_file_paths[(namespace, blockstate_file[:-5])] = (
                         blockstate_path
                     )
-                    yield sub_progress + (blockstate_index) / (
-                        blockstate_count * pack_count * 3
+                    blockstate_progress_manager.update_progress(
+                        blockstate_index / blockstate_count
                     )
 
+                model_progress_manager = pack_progress_manager.get_child(2 / 3, 1.0)
                 model_paths = glob.glob(
                     os.path.join(
                         glob.escape(pack.root_dir),
@@ -191,7 +197,6 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     recursive=True,
                 )
                 model_count = len(model_paths)
-                sub_progress = pack_progress + 2 / (pack_count * 3)
                 for model_index, model_path in enumerate(model_paths):
                     _, namespace, _, *rel_path_list = os.path.normpath(
                         os.path.relpath(model_path, pack.root_dir)
@@ -200,7 +205,7 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                     model_file_paths[(namespace, rel_path.replace(os.sep, "/"))] = (
                         model_path
                     )
-                    yield sub_progress + (model_index) / (model_count * pack_count * 3)
+                    model_progress_manager.update_progress(model_index / model_count)
 
         os.makedirs(os.path.dirname(transparency_cache_path), exist_ok=True)
         with open(transparency_cache_path, "w") as f:
