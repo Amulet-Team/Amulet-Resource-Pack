@@ -7,6 +7,7 @@ import io
 from typing import Generator, TypeVar, Any, Optional
 import logging
 
+from amulet.utils.task_manager import AbstractProgressManager, VoidProgressManager
 from amulet.resource_pack import JavaResourcePack
 
 T = TypeVar("T")
@@ -29,24 +30,12 @@ def get_launcher_manifest() -> dict:
     return launcher_manifest
 
 
-def generator_unpacker(gen: Generator[Any, Any, T]) -> T:
-    try:
-        while True:
-            next(gen)
-    except StopIteration as e:
-        return e.value  # type: ignore
-
-
-def get_latest() -> JavaResourcePack:
-    return generator_unpacker(get_latest_iter())
-
-
-def get_latest_iter() -> Generator[float, None, JavaResourcePack]:
+def get_latest(
+    progress_manager: AbstractProgressManager = VoidProgressManager(),
+) -> JavaResourcePack:
     """Download the latest resource pack if required.
 
     :return: The loaded Java resource pack.
-    :raises:
-        Exception: If the
     """
     vanilla_rp_path = os.path.join(
         os.environ["CACHE_DIR"], "resource_packs", "java", "vanilla"
@@ -71,7 +60,7 @@ def get_latest_iter() -> Generator[float, None, JavaResourcePack]:
             has_new_pack = old_version == new_version
 
         if not has_new_pack:
-            yield from _remove_and_download_iter(vanilla_rp_path, new_version)
+            _remove_and_download(vanilla_rp_path, new_version, progress_manager)
     return JavaResourcePack(vanilla_rp_path)
 
 
@@ -88,26 +77,20 @@ def get_java_vanilla_fix() -> JavaResourcePack:
     return _java_vanilla_fix
 
 
-def get_java_vanilla_latest() -> JavaResourcePack:
+def get_java_vanilla_latest(
+    progress_manager: AbstractProgressManager = VoidProgressManager(),
+) -> JavaResourcePack:
     global _java_vanilla_latest
     if _java_vanilla_latest is None:
-        _java_vanilla_latest = get_latest()
+        _java_vanilla_latest = get_latest(progress_manager)
     return _java_vanilla_latest
 
 
-def get_java_vanilla_latest_iter() -> Generator[float, None, JavaResourcePack]:
-    global _java_vanilla_latest
-    if _java_vanilla_latest is None:
-        _java_vanilla_latest = yield from get_latest_iter()
-    return _java_vanilla_latest
-
-
-def _remove_and_download(path: str, version: str) -> None:
-    for _ in _remove_and_download_iter(path, version):
-        pass
-
-
-def _remove_and_download_iter(path: str, version: str) -> Generator[float, None, None]:
+def _remove_and_download(
+    path: str,
+    version: str,
+    progress_manager: AbstractProgressManager = VoidProgressManager(),
+) -> None:
     # try downloading the new resources to a temporary location
     temp_path = os.path.join(os.path.dirname(path), "_temp_")
     # clear the temporary location
@@ -116,7 +99,7 @@ def _remove_and_download_iter(path: str, version: str) -> Generator[float, None,
     elif os.path.isdir(temp_path):
         shutil.rmtree(temp_path, ignore_errors=True)
 
-    yield from download_resources_iter(temp_path, version)
+    _download_resources(temp_path, version, progress_manager)
     if os.path.isdir(path):
         shutil.rmtree(path, ignore_errors=True)
 
@@ -126,9 +109,12 @@ def _remove_and_download_iter(path: str, version: str) -> Generator[float, None,
         f.write(version)
 
 
-def download_with_retry(
-    url: str, chunk_size: int = 4096, attempts: int = 5
-) -> Generator[float, None, bytes]:
+def _download_with_retry(
+    url: str,
+    chunk_size: int = 4096,
+    attempts: int = 5,
+    progress_manager: AbstractProgressManager = VoidProgressManager(),
+) -> bytes:
     content_length_found = 0
     content = []
 
@@ -142,7 +128,9 @@ def download_with_retry(
                     break
                 content.append(chunk)
                 content_length_found += len(chunk)
-                yield min(1.0, content_length_found / content_length)
+                progress_manager.update_progress(
+                    min(1.0, content_length_found / content_length)
+                )
         if content_length == content_length_found:
             break
     else:
@@ -150,13 +138,12 @@ def download_with_retry(
     return b"".join(content)
 
 
-def download_resources(path: str, version: str) -> None:
-    generator_unpacker(download_resources_iter(path, version))
-
-
-def download_resources_iter(
-    path: str, version: str, chunk_size: int = 4096
-) -> Generator[float, None, None]:
+def _download_resources(
+    path: str,
+    version: str,
+    progress_manager: AbstractProgressManager = VoidProgressManager(),
+    chunk_size: int = 4096,
+) -> None:
     log.info(f"Downloading Java resource pack for version {version}")
     version_url = next(
         (v["url"] for v in get_launcher_manifest()["versions"] if v["id"] == version),
@@ -170,21 +157,23 @@ def download_resources_iter(
             version_manifest = json.load(vm)
         version_client_url = version_manifest["downloads"]["client"]["url"]
 
-        downloader = download_with_retry(version_client_url)
-        try:
-            while True:
-                yield next(downloader) / 2
-        except StopIteration as e:
-            data = e.value
+        progress_manager_child_1 = progress_manager.get_child(0.0, 0.5)
+
+        data = _download_with_retry(
+            version_client_url,
+            chunk_size=chunk_size,
+            progress_manager=progress_manager_child_1,
+        )
 
         client = zipfile.ZipFile(io.BytesIO(data))
         paths: list[str] = [
             fpath for fpath in client.namelist() if fpath.startswith("assets/")
         ]
         path_count = len(paths)
+        progress_manager_child_2 = progress_manager.get_child(0.5, 1.0)
         for path_index, fpath in enumerate(paths):
             if not path_index % 30:
-                yield path_index / (path_count * 2) + 0.5
+                progress_manager_child_2.update_progress(path_index / path_count)
             if fpath.endswith("/"):
                 continue
             os.makedirs(

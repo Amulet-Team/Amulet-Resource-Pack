@@ -9,6 +9,7 @@ from amulet.resource_pack.mesh.block import (
 )
 from amulet.resource_pack.abc.resource_pack import BaseResourcePack
 from amulet.utils.image import missing_no_icon_path
+from amulet.utils.task_manager import AbstractProgressManager, VoidProgressManager
 
 PackT = TypeVar("PackT", bound=BaseResourcePack)
 
@@ -38,14 +39,16 @@ class BaseResourcePackManager(Generic[PackT]):
         except:
             pass
 
-    def _load_iter(self) -> Iterator[float]:
+    def _load(self, progress_manager: AbstractProgressManager) -> None:
         """Load resources."""
         raise NotImplementedError
 
-    def reload(self) -> Iterator[float]:
+    def reload(
+        self, progress_manager: AbstractProgressManager = VoidProgressManager()
+    ) -> None:
         """Unload and reload resources"""
         self._unload()
-        yield from self._load_iter()
+        self._load(progress_manager)
 
     @property
     def missing_no(self) -> str:
