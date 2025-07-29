@@ -34,18 +34,18 @@ class BlockMesh:
     def __init__(
         self,
         transparency: BlockMeshTransparency,
-        textures: list[str],
+        textures: collections.abc.Sequence[str],
         parts: tuple[
-            BlockMeshPart | None,
-            BlockMeshPart | None,
-            BlockMeshPart | None,
-            BlockMeshPart | None,
-            BlockMeshPart | None,
-            BlockMeshPart | None,
-            BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            amulet.resource_pack.mesh.block.BlockMeshPart | None,
         ],
     ) -> None: ...
-    def rotate(self, rotx: int, roty: int) -> BlockMesh:
+    def rotate(self, rotx: typing.SupportsInt, roty: typing.SupportsInt) -> BlockMesh:
         """
         Rotate the mesh in the x and y axis. Accepted values are -3 to 3 which correspond to 90 degree rotations.
         """
@@ -54,13 +54,13 @@ class BlockMesh:
     def parts(
         self,
     ) -> tuple[
-        BlockMeshPart | None,
-        BlockMeshPart | None,
-        BlockMeshPart | None,
-        BlockMeshPart | None,
-        BlockMeshPart | None,
-        BlockMeshPart | None,
-        BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        amulet.resource_pack.mesh.block.BlockMeshPart | None,
     ]:
         """
         The mesh parts that make up this mesh. The index corresponds to the value of BlockMeshCullDirection.
@@ -129,7 +129,7 @@ class BlockMeshCullDirection:
     def __gt__(self, other: typing.Any) -> bool: ...
     def __hash__(self) -> int: ...
     def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
+    def __init__(self, value: typing.SupportsInt) -> None: ...
     def __int__(self) -> int: ...
     def __invert__(self) -> typing.Any: ...
     def __le__(self, other: typing.Any) -> bool: ...
@@ -152,7 +152,11 @@ class BlockMeshPart:
     A part of a block mesh for one of the culling directions.
     """
 
-    def __init__(self, verts: list[Vertex], triangles: list[Triangle]) -> None: ...
+    def __init__(
+        self,
+        verts: collections.abc.Sequence[Vertex],
+        triangles: collections.abc.Sequence[Triangle],
+    ) -> None: ...
     @property
     def triangles(self) -> list[Triangle]:
         """
@@ -195,7 +199,7 @@ class BlockMeshTransparency:
     def __gt__(self, other: typing.Any) -> bool: ...
     def __hash__(self) -> int: ...
     def __index__(self) -> int: ...
-    def __init__(self, value: int) -> None: ...
+    def __init__(self, value: typing.SupportsInt) -> None: ...
     def __int__(self) -> int: ...
     def __le__(self, other: typing.Any) -> bool: ...
     def __lt__(self, other: typing.Any) -> bool: ...
@@ -212,7 +216,7 @@ class FloatVec2:
     A 2D floating point vector
     """
 
-    def __init__(self, x: float, y: float) -> None: ...
+    def __init__(self, x: typing.SupportsFloat, y: typing.SupportsFloat) -> None: ...
     @property
     def x(self) -> float: ...
     @property
@@ -223,7 +227,9 @@ class FloatVec3:
     A 3D floating point vector
     """
 
-    def __init__(self, x: float, y: float, z: float) -> None: ...
+    def __init__(
+        self, x: typing.SupportsFloat, y: typing.SupportsFloat, z: typing.SupportsFloat
+    ) -> None: ...
     @property
     def x(self) -> float: ...
     @property
@@ -238,10 +244,10 @@ class Triangle:
 
     def __init__(
         self,
-        vert_index_a: int,
-        vert_index_b: int,
-        vert_index_c: int,
-        texture_index: int,
+        vert_index_a: typing.SupportsInt,
+        vert_index_b: typing.SupportsInt,
+        vert_index_c: typing.SupportsInt,
+        texture_index: typing.SupportsInt,
     ) -> None: ...
     @property
     def texture_index(self) -> int: ...
