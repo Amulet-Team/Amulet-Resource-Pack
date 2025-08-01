@@ -152,7 +152,9 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
                                 alpha = numpy.array(im.getchannel("A").getdata())
                                 texture_is_transparent = bool(numpy.any(alpha != 255))
                             elif im.mode == "P":
-                                texture_is_transparent = im.info.get("transparency", 0) != 0
+                                texture_is_transparent = (
+                                    im.info.get("transparency", 0) != 0
+                                )
                             else:
                                 texture_is_transparent = False
 
