@@ -18,7 +18,7 @@ from . import (
     unknown_resource_pack,
 )
 
-__all__ = [
+__all__: list[str] = [
     "BaseResourcePack",
     "BaseResourcePackManager",
     "JavaResourcePack",

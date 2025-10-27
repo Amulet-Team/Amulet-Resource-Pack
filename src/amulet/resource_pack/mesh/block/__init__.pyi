@@ -8,7 +8,7 @@ from amulet.resource_pack.mesh.block._cube import get_cube, get_unit_cube
 
 from . import _cube
 
-__all__ = [
+__all__: list[str] = [
     "BlockMesh",
     "BlockMeshCullDirection",
     "BlockMeshPart",
@@ -36,13 +36,13 @@ class BlockMesh:
         transparency: BlockMeshTransparency,
         textures: collections.abc.Sequence[str],
         parts: tuple[
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
-            amulet.resource_pack.mesh.block.BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
+            BlockMeshPart | None,
         ],
     ) -> None: ...
     def rotate(self, rotx: typing.SupportsInt, roty: typing.SupportsInt) -> BlockMesh:
@@ -54,13 +54,13 @@ class BlockMesh:
     def parts(
         self,
     ) -> tuple[
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
-        amulet.resource_pack.mesh.block.BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
+        BlockMeshPart | None,
     ]:
         """
         The mesh parts that make up this mesh. The index corresponds to the value of BlockMeshCullDirection.
