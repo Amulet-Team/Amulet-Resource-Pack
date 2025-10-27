@@ -5,7 +5,7 @@ from amulet.resource_pack.abc.resource_pack_manager import BaseResourcePackManag
 
 from . import resource_pack, resource_pack_manager
 
-__all__ = [
+__all__: list[str] = [
     "BaseResourcePack",
     "BaseResourcePackManager",
     "resource_pack",

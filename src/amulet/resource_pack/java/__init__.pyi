@@ -5,7 +5,7 @@ from amulet.resource_pack.java.resource_pack_manager import JavaResourcePackMana
 
 from . import resource_pack, resource_pack_manager
 
-__all__ = [
+__all__: list[str] = [
     "JavaResourcePack",
     "JavaResourcePackManager",
     "resource_pack",
