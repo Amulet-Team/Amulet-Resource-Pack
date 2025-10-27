@@ -4,17 +4,20 @@ import zipfile
 import json
 from urllib.request import urlopen, Request
 import io
-from typing import Generator, TypeVar, Any, Optional
 import logging
 
-from amulet.utils.task_manager import AbstractProgressManager, VoidProgressManager
+from amulet.utils.task_manager import (
+    AbstractProgressManager,
+    VoidProgressManager,
+    AbstractCancelManager,
+    VoidCancelManager,
+    TaskCancelled,
+)
 from amulet.resource_pack import JavaResourcePack
-
-T = TypeVar("T")
 
 log = logging.getLogger(__name__)
 
-launcher_manifest: Optional[dict] = None
+launcher_manifest: dict | None = None
 INCLUDE_SNAPSHOT = False
 
 
@@ -32,6 +35,7 @@ def get_launcher_manifest() -> dict:
 
 def get_latest(
     progress_manager: AbstractProgressManager = VoidProgressManager(),
+    cancel_manager: AbstractCancelManager = VoidCancelManager(),
 ) -> JavaResourcePack:
     """Download the latest resource pack if required.
 
@@ -60,12 +64,14 @@ def get_latest(
             has_new_pack = old_version == new_version
 
         if not has_new_pack:
-            _remove_and_download(vanilla_rp_path, new_version, progress_manager)
+            _remove_and_download(
+                vanilla_rp_path, new_version, progress_manager, cancel_manager
+            )
     return JavaResourcePack(vanilla_rp_path)
 
 
-_java_vanilla_fix: Optional[JavaResourcePack] = None
-_java_vanilla_latest: Optional[JavaResourcePack] = None
+_java_vanilla_fix: JavaResourcePack | None = None
+_java_vanilla_latest: JavaResourcePack | None = None
 
 
 def get_java_vanilla_fix() -> JavaResourcePack:
@@ -79,10 +85,11 @@ def get_java_vanilla_fix() -> JavaResourcePack:
 
 def get_java_vanilla_latest(
     progress_manager: AbstractProgressManager = VoidProgressManager(),
+    cancel_manager: AbstractCancelManager = VoidCancelManager(),
 ) -> JavaResourcePack:
     global _java_vanilla_latest
     if _java_vanilla_latest is None:
-        _java_vanilla_latest = get_latest(progress_manager)
+        _java_vanilla_latest = get_latest(progress_manager, cancel_manager)
     return _java_vanilla_latest
 
 
@@ -90,6 +97,7 @@ def _remove_and_download(
     path: str,
     version: str,
     progress_manager: AbstractProgressManager = VoidProgressManager(),
+    cancel_manager: AbstractCancelManager = VoidCancelManager(),
 ) -> None:
     # try downloading the new resources to a temporary location
     temp_path = os.path.join(os.path.dirname(path), "_temp_")
@@ -99,14 +107,17 @@ def _remove_and_download(
     elif os.path.isdir(temp_path):
         shutil.rmtree(temp_path, ignore_errors=True)
 
-    _download_resources(temp_path, version, progress_manager)
-    if os.path.isdir(path):
-        shutil.rmtree(path, ignore_errors=True)
+    try:
+        _download_resources(temp_path, version, progress_manager, cancel_manager)
+    except:
+        shutil.rmtree(temp_path, ignore_errors=True)
+    else:
+        if os.path.isdir(path):
+            shutil.rmtree(path, ignore_errors=True)
+        shutil.move(temp_path, path)
 
-    shutil.move(temp_path, path)
-
-    with open(os.path.join(path, "version"), "w") as f:
-        f.write(version)
+        with open(os.path.join(path, "version"), "w") as f:
+            f.write(version)
 
 
 def _download_with_retry(
@@ -114,6 +125,7 @@ def _download_with_retry(
     chunk_size: int = 4096,
     attempts: int = 5,
     progress_manager: AbstractProgressManager = VoidProgressManager(),
+    cancel_manager: AbstractCancelManager = VoidCancelManager(),
 ) -> bytes:
     content_length_found = 0
     content = []
@@ -123,6 +135,8 @@ def _download_with_retry(
         with urlopen(request, timeout=20) as response:
             content_length = int(response.headers["content-length"].strip())
             while content_length_found < content_length:
+                if cancel_manager.is_cancel_requested():
+                    raise TaskCancelled
                 chunk = response.read(chunk_size)
                 if not chunk:
                     break
@@ -142,6 +156,7 @@ def _download_resources(
     path: str,
     version: str,
     progress_manager: AbstractProgressManager = VoidProgressManager(),
+    cancel_manager: AbstractCancelManager = VoidCancelManager(),
     chunk_size: int = 4096,
 ) -> None:
     log.info(f"Downloading Java resource pack for version {version}")
@@ -163,6 +178,7 @@ def _download_resources(
             version_client_url,
             chunk_size=chunk_size,
             progress_manager=progress_manager_child_1,
+            cancel_manager=cancel_manager,
         )
 
         client = zipfile.ZipFile(io.BytesIO(data))
@@ -173,6 +189,8 @@ def _download_resources(
         progress_manager_child_2 = progress_manager.get_child(0.5, 1.0)
         for path_index, fpath in enumerate(paths):
             if not path_index % 30:
+                if cancel_manager.is_cancel_requested():
+                    raise TaskCancelled
                 progress_manager_child_2.update_progress(path_index / path_count)
             if fpath.endswith("/"):
                 continue
@@ -192,10 +210,12 @@ def _download_resources(
         if "pack.png" in client.namelist():
             client.extract("pack.png", path)
 
-    except Exception as e:
+    except TaskCancelled:
+        raise
+    except Exception:
         log.error(
             f"Failed to download and extract the Java resource pack for version {version}.",
             exc_info=True,
         )
-        raise e
+        raise
     log.info(f"Finished downloading Java resource pack for version {version}")
