@@ -13,6 +13,7 @@ from amulet.utils.task_manager import (
     VoidCancelManager,
     TaskCancelled,
 )
+from amulet.utils.temp import get_temp_dir
 from amulet.resource_pack import JavaResourcePack
 
 log = logging.getLogger(__name__)
@@ -41,9 +42,7 @@ def get_latest(
 
     :return: The loaded Java resource pack.
     """
-    vanilla_rp_path = os.path.join(
-        os.environ["CACHE_DIR"], "resource_packs", "java", "vanilla"
-    )
+    vanilla_rp_path = os.path.join(get_temp_dir(), "resource_packs", "java", "vanilla")
     try:
         if INCLUDE_SNAPSHOT:
             new_version = get_launcher_manifest()["latest"]["snapshot"]
