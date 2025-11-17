@@ -12,6 +12,7 @@ from amulet.nbt import StringTag
 
 from amulet.utils.cast import dynamic_cast
 from amulet.utils.task_manager import AbstractProgressManager
+from amulet.utils.temp import get_temp_dir
 from amulet.core.block import Block
 from amulet.resource_pack import BaseResourcePackManager
 from amulet.resource_pack.java import JavaResourcePack
@@ -102,7 +103,7 @@ class JavaResourcePackManager(BaseResourcePackManager[JavaResourcePack]):
         model_file_paths: dict[tuple[str, str], str] = {}
 
         transparency_cache_path = os.path.join(
-            os.environ["CACHE_DIR"], "resource_packs", "java", "transparency_cache.json"
+            get_temp_dir(), "resource_packs", "java", "transparency_cache.json"
         )
         self._load_transparency_cache(transparency_cache_path)
 
