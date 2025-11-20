@@ -4,6 +4,7 @@
 #include <pybind11/typing.h>
 
 #include <memory>
+#include <span>
 
 #include <amulet/pybind11_extensions/collections.hpp>
 
@@ -154,12 +155,12 @@ void init_block_mesh(py::module m)
     BlockMesh.def("rotate", &Amulet::BlockMesh::rotate, py::arg("rotx"), py::arg("roty"), py::doc("Rotate the mesh in the x and y axis. Accepted values are -3 to 3 which correspond to 90 degree rotations."));
 
     m.def(
-        "merge_block_meshes", [](Amulet::pybind11_extensions::collections::Sequence<Amulet::BlockMesh> py_meshes) {
-            std::vector<std::reference_wrapper<const Amulet::BlockMesh>> meshes;
-            for (auto mesh : py_meshes) {
+        "merge_block_meshes", [](Amulet::pybind11_extensions::collections::Sequence<Amulet::BlockMesh*> py_meshes) {
+            std::vector<const Amulet::BlockMesh*> meshes;
+            for (const auto* mesh : py_meshes) {
                 meshes.push_back(mesh);
             }
-            return Amulet::merge_block_meshes(meshes);
+            return Amulet::merge_block_meshes({ &meshes[0], meshes.size() });
         },
         py::arg("meshes"), py::doc("Merge multiple block mesh objects into one block mesh."));
 

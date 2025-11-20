@@ -1,5 +1,6 @@
 #include <array>
 #include <functional>
+#include <span>
 #include <string>
 
 #include <amulet/resource_pack/dll.hpp>
@@ -98,19 +99,18 @@ BlockMesh BlockMesh::rotate(std::int8_t rotx, std::int8_t roty) const
     return *this;
 }
 
-BlockMesh merge_block_meshes(std::vector<std::reference_wrapper<const BlockMesh>> meshes)
+BlockMesh merge_block_meshes(std::span<const BlockMesh*> meshes)
 {
     BlockMesh new_mesh;
     new_mesh.transparency = BlockMeshTransparency::Partial;
     std::map<std::string, size_t> texture_index_map;
-    for (const auto& wrapper : meshes) {
-        const auto& temp_mesh = wrapper.get();
+    for (const auto* temp_mesh : meshes) {
         // Get the minimum transparency of the two meshes.
-        new_mesh.transparency = std::min(new_mesh.transparency, temp_mesh.transparency);
+        new_mesh.transparency = std::min(new_mesh.transparency, temp_mesh->transparency);
 
         // Copy over mesh parts
         for (std::uint8_t cull_direction = 0; cull_direction < 7; cull_direction++) {
-            const auto& temp_mesh_part = temp_mesh.parts[cull_direction];
+            const auto& temp_mesh_part = temp_mesh->parts[cull_direction];
             if (temp_mesh_part) {
                 auto& new_mesh_part = new_mesh.parts[cull_direction];
                 if (!new_mesh_part) {
@@ -143,10 +143,10 @@ BlockMesh merge_block_meshes(std::vector<std::reference_wrapper<const BlockMesh>
                     triangle.vert_index_a += vert_count;
                     triangle.vert_index_b += vert_count;
                     triangle.vert_index_c += vert_count;
-                    if (temp_mesh.textures.size() <= triangle.texture_index) {
+                    if (temp_mesh->textures.size() <= triangle.texture_index) {
                         throw std::invalid_argument("Texture index is higher than the number of textures.");
                     }
-                    const auto& texture_path = temp_mesh.textures[triangle.texture_index];
+                    const auto& texture_path = temp_mesh->textures[triangle.texture_index];
                     auto it = texture_index_map.find(texture_path);
                     if (it == texture_index_map.end()) {
                         // Texture has not been added yet.

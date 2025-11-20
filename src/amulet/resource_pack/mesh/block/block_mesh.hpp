@@ -6,6 +6,7 @@
 #include <map>
 #include <numbers>
 #include <optional>
+#include <span>
 #include <stdexcept>
 #include <string>
 #include <vector>
@@ -136,6 +137,6 @@ public:
     AMULET_RESOURCE_PACK_EXPORT BlockMesh rotate(std::int8_t rotx, std::int8_t roty) const;
 };
 
-AMULET_RESOURCE_PACK_EXPORT BlockMesh merge_block_meshes(std::vector<std::reference_wrapper<const BlockMesh>>);
+AMULET_RESOURCE_PACK_EXPORT BlockMesh merge_block_meshes(std::span<const BlockMesh*>);
 
 }
