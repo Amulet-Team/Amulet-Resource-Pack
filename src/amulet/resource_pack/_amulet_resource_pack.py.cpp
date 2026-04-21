@@ -5,22 +5,19 @@
 namespace py = pybind11;
 namespace pyext = Amulet::pybind11_extensions;
 
-void init_mesh(py::module);
-void init_image(py::module);
+void init_amulet_resource_pack(py::module);
 
-void init_module(py::module m)
+static void _init_amulet_resource_pack(py::module m)
 {
     pyext::init_compiler_config(m);
     pyext::check_compatibility(py::module::import("amulet.utils"), m);
     pyext::check_compatibility(py::module::import("amulet.zlib"), m);
     pyext::check_compatibility(py::module::import("amulet.nbt"), m);
     pyext::check_compatibility(py::module::import("amulet.core"), m);
-
-    init_mesh(m);
-    init_image(m);
+    init_amulet_resource_pack(m);
 }
 
 PYBIND11_MODULE(_amulet_resource_pack, m)
 {
-    m.def("init", &init_module, py::arg("m"));
+    m.def("init", &_init_amulet_resource_pack, py::arg("m"));
 }

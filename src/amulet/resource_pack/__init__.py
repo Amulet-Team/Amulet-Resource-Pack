@@ -13,6 +13,9 @@ def _init() -> None:
     import sys
     import ctypes
 
+    if os.environ.get("AMULET_SKIP_COMPILE", None):
+        return
+
     if sys.platform == "win32":
         lib_path = os.path.join(os.path.dirname(__file__), "amulet_resource_pack.dll")
     elif sys.platform == "darwin":
@@ -39,6 +42,7 @@ def _init() -> None:
 
 
 _init()
+del _init
 
 from amulet.resource_pack.abc import (
     BaseResourcePack,
