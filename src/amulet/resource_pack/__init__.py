@@ -42,6 +42,7 @@ def _init() -> None:
 
 
 _init()
+del _init
 
 from amulet.resource_pack.abc import (
     BaseResourcePack,
