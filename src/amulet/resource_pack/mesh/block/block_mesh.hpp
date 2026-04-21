@@ -111,7 +111,7 @@ typedef std::map<
 // gives the rotated cull direction.
 // extern const RotationCullMapType RotationCullMap;
 
-class BlockMesh {
+class AMULET_RESOURCE_PACK_EXPORT BlockMesh {
 public:
     BlockMeshTransparency transparency;
     std::vector<std::string> textures;
@@ -134,7 +134,7 @@ public:
     {
     }
 
-    AMULET_RESOURCE_PACK_EXPORT BlockMesh rotate(std::int8_t rotx, std::int8_t roty) const;
+    BlockMesh rotate(std::int8_t rotx, std::int8_t roty) const;
 };
 
 AMULET_RESOURCE_PACK_EXPORT BlockMesh merge_block_meshes(std::span<const BlockMesh*>);
