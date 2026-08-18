@@ -33,8 +33,5 @@ __all__: list[str] = [
     "mesh",
     "unknown_resource_pack",
 ]
-
-def _init() -> None: ...
-
 __version__: str
 compiler_config: dict
